@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
+    <import resource="sharding-rule.xml"/>
+
+    <bean id="taowei_0" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close" primary="true" >
+        <property name="driverClassName" value="${mysql.jdbc.driverClass}"/>
+        <property name="jdbcUrl" value="${mysql.taowei0.jdbc.url}"/>
+        <property name="username" value="${mysql.taowei0.jdbc.username}"/>
+        <property name="password" value="${mysql.taowei0.jdbc.password}"/>
+        <property name="connectionTimeout" value="${mysql.taowei0.jdbc.connectionTimeout}" />
+        <property name="idleTimeout" value="${mysql.taowei0.jdbc.idleTimeout}" />
+        <property name="minimumIdle" value="${mysql.taowei0.jdbc.minimumIdle}" />
+        <property name="maximumPoolSize" value="${mysql.taowei0.jdbc.maximumPoolSize}" />
+        <property name="connectionInitSql" value="set names utf8mb4;"/>
+        <property name="poolName" value="ShardMaster"/>
+    </bean>
+
+    <bean id="taowei_1" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close" primary="true" >
+        <property name="driverClassName" value="${mysql.jdbc.driverClass}"/>
+        <property name="jdbcUrl" value="${mysql.taowei1.jdbc.url}"/>
+        <property name="username" value="${mysql.taowei1.jdbc.username}"/>
+        <property name="password" value="${mysql.taowei1.jdbc.password}"/>
+        <property name="connectionTimeout" value="${mysql.taowei1.jdbc.connectionTimeout}" />
+        <property name="idleTimeout" value="${mysql.taowei1.jdbc.idleTimeout}" />
+        <property name="minimumIdle" value="${mysql.taowei1.jdbc.minimumIdle}" />
+        <property name="maximumPoolSize" value="${mysql.taowei1.jdbc.maximumPoolSize}" />
+        <property name="connectionInitSql" value="set names utf8mb4;"/>
+        <property name="poolName" value="ShardMaster"/>
+    </bean>
+
+<!--    <bean id="dynamicDataSource" class="com.snowalker.shardingjdbc.snowalker.demo.shardCommon.dataSourceRoute.datasource.RoutingDataSource">-->
+<!--        <property name="targetDataSources">-->
+<!--            <map>-->
+<!--                <entry value-ref="shardingDataSource" key="dbShardMaster"></entry>-->
+<!--            </map>-->
+<!--        </property>-->
+<!--    </bean>-->
+
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="shardingDataSource"/>
+<!--        <property name="dataSource" ref="dynamicDataSource"/>-->
+        <property name="configLocation" value="classpath:mybatis.xml"/>
+        <property name="mapperLocations" value="classpath:mapper/*.xml"/>
+    </bean>
+
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="shardingDataSource"/>
+    </bean>
+
+    <bean id="transactionTemplate" class="org.springframework.transaction.support.TransactionTemplate">
+        <property name="transactionManager" ref="transactionManager" />
+        <property name="isolationLevelName" value="ISOLATION_DEFAULT"/>
+    </bean>
+
+</beans>

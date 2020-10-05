@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:sharding="http://shardingsphere.apache.org/schema/shardingsphere/sharding"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                        http://www.springframework.org/schema/beans/spring-beans.xsd
+                        http://shardingsphere.apache.org/schema/shardingsphere/sharding
+                        http://shardingsphere.apache.org/schema/shardingsphere/sharding/sharding.xsd
+                        ">
+    <!-- 定义分表算法 -->
+    <bean id="dBHintShardAlgo" class="com.snowalker.shardingjdbc.snowalker.demo.shardCommon.shardAlgo.DBHintShardAlgo" />
+    <bean id="tbUserHintlPreShardAlgo" class="com.snowalker.shardingjdbc.snowalker.demo.shardCommon.shardAlgo.TbUserHintlPreShardAlgo" />
+
+    <!-- 指定分表策略，及对应的算法 -->
+    <sharding:hint-strategy id="dataBaseStrategy" algorithm-ref="dBHintShardAlgo" />
+    <sharding:hint-strategy id="userStrategy" algorithm-ref="tbUserHintlPreShardAlgo" />
+
+    <!-- 指定dataSource，并定义分表规则 -->
+    <sharding:data-source id="shardingDataSource">
+        <sharding:sharding-rule data-source-names="taowei_0,taowei_1" default-data-source-name="taowei_0">
+            <sharding:table-rules>
+                <!-- 配置t_user规则 -->
+                <sharding:table-rule logic-table="t_user" actual-data-nodes="taowei_$->{0..1}.t_user_000$->{0..3}"
+                database-strategy-ref="dataBaseStrategy" table-strategy-ref="userStrategy" />
+            </sharding:table-rules>
+            <!-- 配置绑定关系 -->
+        </sharding:sharding-rule>
+        <sharding:props>
+            <prop key="sql.show">true</prop>
+            <prop key="max.connections.size.per.query">4</prop>
+        </sharding:props>
+    </sharding:data-source>
+
+</beans>
